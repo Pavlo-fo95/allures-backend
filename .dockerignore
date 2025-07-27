@@ -1,0 +1,71 @@
+# ================== Python cache ==================
+.venv/
+__pycache__/
+*.pyc
+
+# ================== Docker volumes & runtime ==================
+*.pid
+*.sock
+
+# ================== Env файлы ==================
+.env.*
+.env
+
+# ================== Datasets / временные данные ==================
+datasets/
+datasets/bags/
+datasets/bags/Bags/
+datasets/electronics/
+datasets/fashion/
+datasets/fashion/Accessories/
+datasets/fashion/Apparel/
+datasets/personal_care/
+
+fashion-dataset/
+fashion-dataset/images/
+fashion-dataset/selected_images/
+fashion-dataset/valid_images/
+
+# ================== Статические мок-изображения ==================
+mock_static/
+mock_static/product-images/
+mock_static/uploads/
+assets/images/
+
+# ================== IDE и системные ==================
+.vscode/
+.idea/
+*.log
+*.sqlite3
+*.db
+*.ipynb_checkpoints/
+outputs/
+logs/
+runs/
+notebooks/
+
+# ================== Jupyter ==================
+*.ipynb
+
+# ================== ML-модели ==================
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.ckpt
+*.onnx
+model_checkpoints/
+checkpoints/
+
+# ================== Git ==================
+.git
+.gitignore
+.dockerignore
+
+# ================== Pytest и build ==================
+htmlcov/
+.coverage
+.cache/
+.tox/
+dist/
+build/

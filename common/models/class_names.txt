@@ -1,0 +1,17 @@
+art
+automotive
+bags
+books
+diy
+electronics
+fashion
+food
+home
+medical
+military
+office
+outdoor
+personal_care
+pets
+sports
+toys
