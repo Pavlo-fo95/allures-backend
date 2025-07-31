@@ -57,17 +57,14 @@ jobs:
             echo "changed_dirs=$changed" >> $GITHUB_OUTPUT
           fi
 
-      - name: Debug changed_dirs
-        run: echo "Изменённые сервисы: ${{ steps.changes.outputs.changed_dirs }}"
-
       - name: Build and push admin_service
-        if: contains(steps.changes.outputs.changed_dirs, 'admin_service')
-        uses: docker/build-push-action@v4
-        with:
-          context: ./services/admin_service
-          file: ./services/admin_service/Dockerfile
-          push: true
-          tags: denstep123/admin-service:latest
+  if: contains(steps.changes.outputs.changed_dirs, 'admin_service')
+  uses: docker/build-push-action@v4
+  with:
+    context: ./services/admin_service
+    file: ./services/admin_service/Dockerfile
+    push: true
+    tags: denstep123/admin-service:latest
 
       - name: Build and push auth_service
         if: contains(steps.changes.outputs.changed_dirs, 'auth_service')
