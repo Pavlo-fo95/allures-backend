@@ -48,7 +48,6 @@ notebooks/
 *.ipynb
 
 # ================== ML-модели ==================
-!common/models/image_classifier.h5
 *.hdf5
 *.pt
 *.pth
