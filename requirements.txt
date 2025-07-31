@@ -168,8 +168,7 @@ python-json-logger==3.3.0
 python-multipart==0.0.18
 python-tds==1.16.1
 pytz==2025.2
-pywin32==311
-pywinpty==2.0.15
+
 pyzmq==27.0.0
 referencing==0.36.2
 regex==2024.11.6
