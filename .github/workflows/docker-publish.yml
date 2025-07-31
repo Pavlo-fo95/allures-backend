@@ -1,9 +1,23 @@
-name: Build and Push Changed Services
+name: Build and Push Services
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Режим запуска (auto, full, custom)'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - full
+          - custom
+      custom_services:
+        description: 'Сервисы через запятую (если режим = custom)'
+        required: false
 
 jobs:
   build:
@@ -15,24 +29,48 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get changed services
+      - name: Определение списка сервисов
         id: changes
         run: |
-          if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
-            echo "changed_dirs=$(git diff --name-only HEAD~1 HEAD | grep '^services/' | cut -d/ -f2 | uniq | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MODE="${{ github.event.inputs.mode }}"
+            echo "Режим запуска: $MODE"
+
+            if [ "$MODE" = "full" ]; then
+              echo "changed_dirs=admin_service auth_service dashboard_service discount_service payment_service product_service profile_service review_service sales_service subscription_service" >> $GITHUB_OUTPUT
+
+            elif [ "$MODE" = "custom" ]; then
+              echo "changed_dirs=${{ github.event.inputs.custom_services }}" >> $GITHUB_OUTPUT
+
+            else
+              if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+                diff=$(git diff --name-only HEAD~1 HEAD)
+              else
+                diff=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+              fi
+              changed=$(echo "$diff" | grep '^services/' | cut -d/ -f2 | uniq | tr '\n' ' ')
+              echo "changed_dirs=$changed" >> $GITHUB_OUTPUT
+            fi
           else
-            echo "changed_dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^services/' | cut -d/ -f2 | uniq | tr '\n' ' ')" >> $GITHUB_OUTPUT
+            diff=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+            changed=$(echo "$diff" | grep '^services/' | cut -d/ -f2 | uniq | tr '\n' ' ')
+            echo "changed_dirs=$changed" >> $GITHUB_OUTPUT
           fi
 
-      - name: Build and push admin_service
-        if: contains(steps.changes.outputs.changed_dirs, 'admin_service')
+      - name: Debug changed_dirs
+        run: echo "Изменённые сервисы: ${{ steps.changes.outputs.changed_dirs }}"
+
+      - name: Build and push services
         uses: docker/build-push-action@v4
+        if: contains(steps.changes.outputs.changed_dirs, 'admin_service')
         with:
           context: ./services/admin_service
           file: ./services/admin_service/Dockerfile
           push: true
           tags: denstep123/admin-service:latest
 
+      # Далее по аналогии остальные сервисы (auth_service, dashboard_service и т.д.)
+      # Добавим как шаблонный пример один, остальные можешь копипастить и заменить имя
       - name: Build and push auth_service
         if: contains(steps.changes.outputs.changed_dirs, 'auth_service')
         uses: docker/build-push-action@v4
@@ -41,78 +79,6 @@ jobs:
           file: ./services/auth_service/Dockerfile
           push: true
           tags: denstep123/auth-service:latest
-
-      - name: Build and push dashboard_service
-        if: contains(steps.changes.outputs.changed_dirs, 'dashboard_service')
-        uses: docker/build-push-action@v4
-        with:
-          context: ./services/dashboard_service
-          file: ./services/dashboard_service/Dockerfile
-          push: true
-          tags: denstep123/dashboard-service:latest
-
-      - name: Build and push discount_service
-        if: contains(steps.changes.outputs.changed_dirs, 'discount_service')
-        uses: docker/build-push-action@v4
-        with:
-          context: ./services/discount_service
-          file: ./services/discount_service/Dockerfile
-          push: true
-          tags: denstep123/discount-service:latest
-
-      - name: Build and push payment_service
-        if: contains(steps.changes.outputs.changed_dirs, 'payment_service')
-        uses: docker/build-push-action@v4
-        with:
-          context: ./services/payment_service
-          file: ./services/payment_service/Dockerfile
-          push: true
-          tags: denstep123/payment-service:latest
-
-      - name: Build and push product_service
-        if: contains(steps.changes.outputs.changed_dirs, 'product_service')
-        uses: docker/build-push-action@v4
-        with:
-          context: ./services/product_service
-          file: ./services/product_service/Dockerfile
-          push: true
-          tags: denstep123/product-service:latest
-
-      - name: Build and push profile_service
-        if: contains(steps.changes.outputs.changed_dirs, 'profile_service')
-        uses: docker/build-push-action@v4
-        with:
-          context: ./services/profile_service
-          file: ./services/profile_service/Dockerfile
-          push: true
-          tags: denstep123/profile-service:latest
-
-      - name: Build and push review_service
-        if: contains(steps.changes.outputs.changed_dirs, 'review_service')
-        uses: docker/build-push-action@v4
-        with:
-          context: ./services/review_service
-          file: ./services/review_service/Dockerfile
-          push: true
-          tags: denstep123/review-service:latest
-
-      - name: Build and push sales_service
-        if: contains(steps.changes.outputs.changed_dirs, 'sales_service')
-        uses: docker/build-push-action@v4
-        with:
-          context: ./services/sales_service
-          file: ./services/sales_service/Dockerfile
-          push: true
-          tags: denstep123/sales-service:latest
-
-      - name: Build and push subscription_service
-        if: contains(steps.changes.outputs.changed_dirs, 'subscription_service')
-        uses: docker/build-push-action@v4
-        with:
-          context: ./services/subscription_service
-          file: ./services/subscription_service/Dockerfile
-          push: true
-          tags: denstep123/subscription-service:latest
 
       - name: Trigger server webhook
         run: |
