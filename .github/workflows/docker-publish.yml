@@ -25,3 +25,7 @@ jobs:
         context: .
         push: true
         tags: denstep123/allures-backend:latest
+    - name: 🔁 Вызов вебхука на сервере
+      run: |
+        curl -X POST "${{ secrets.SERVER_WEBHOOK_URL }}" \
+        -H "X-GitHub-Secret: ${{ secrets.SOME_SECRET_HEADER }}"
