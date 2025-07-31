@@ -1,31 +1,105 @@
-name: Build and Push Docker image
+name: Build and Push Docker images
 
 on:
   push:
     branches:
-      - main  # или master, или любая ветка, с которой хочешь деплоить
+      - main
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        push: true
-        tags: denstep123/allures-backend:latest
-    - name: 🔁 Вызов вебхука на сервере
-      run: |
-        curl -X POST "${{ secrets.SERVER_WEBHOOK_URL }}" \
-        -H "X-GitHub-Secret: ${{ secrets.SOME_SECRET_HEADER }}"
+      # 🔁 Список всех сервисов, которые билдятся и пушатся
+      - name: Build and push auth_service
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: services/auth_service/Dockerfile
+          push: true
+          tags: denstep123/auth-service:latest
+
+      - name: Build and push admin_service
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: services/admin_service/Dockerfile
+          push: true
+          tags: denstep123/admin-service:latest
+
+      - name: Build and push sales_service
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: services/sales_service/Dockerfile
+          push: true
+          tags: denstep123/sales-service:latest
+
+      - name: Build and push review_service
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: services/review_service/Dockerfile
+          push: true
+          tags: denstep123/review-service:latest
+
+      - name: Build and push payment_service
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: services/payment_service/Dockerfile
+          push: true
+          tags: denstep123/payment-service:latest
+
+      - name: Build and push product_service
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: services/product_service/Dockerfile
+          push: true
+          tags: denstep123/product-service:latest
+
+      - name: Build and push profile_service
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: services/profile_service/Dockerfile
+          push: true
+          tags: denstep123/profile-service:latest
+
+      - name: Build and push discount_service
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: services/discount_service/Dockerfile
+          push: true
+          tags: denstep123/discount-service:latest
+
+      - name: Build and push dashboard_service
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: services/dashboard_service/Dockerfile
+          push: true
+          tags: denstep123/dashboard-service:latest
+
+      - name: Build and push subscription_service
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: services/subscription_service/Dockerfile
+          push: true
+          tags: denstep123/subscription-service:latest
+
+      - name: 🔁 Вызов вебхука на сервере
+        run: |
+          curl -X POST "${{ secrets.SERVER_WEBHOOK_URL }}" \
+          -H "X-GitHub-Secret: ${{ secrets.SOME_SECRET_HEADER }}"
