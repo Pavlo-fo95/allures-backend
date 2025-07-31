@@ -15,7 +15,11 @@ jobs:
       - name: Get changed services
         id: changes
         run: |
-          echo "changed_dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^services/' | cut -d/ -f2 | uniq | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            echo "changed_dirs=$(git diff --name-only HEAD~1 HEAD | grep '^services/' | cut -d/ -f2 | uniq | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          else
+            echo "changed_dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^services/' | cut -d/ -f2 | uniq | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          fi
 
       - name: Build and push admin_service
         if: contains(steps.changes.outputs.changed_dirs, 'admin_service')
