@@ -1,11 +1,13 @@
 art
 automotive
 bags
+beauty
 books
 diy
 electronics
 fashion
 food
+gadgets
 home
 medical
 military

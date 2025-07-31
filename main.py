@@ -3,11 +3,12 @@ import sys
 import os
 # Добавление корневого пути (для импорта модулей из /services и /common)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
-#import common.utils.env_loader
+from tensorflow.keras.models import load_model
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+#import common.utils.env_loader
 
 from common.db.session import get_db
 from sqlalchemy import text
@@ -21,7 +22,7 @@ from common.db.session import SessionLocal
 
 # Импорт роутеров всех микросервисов
 from services.product_service.api.routes import router as product_router
-from services.product_service.api import image_classifier_router
+# from services.product_service.api import image_classifier_router
 from services.review_service.api.routes import router as review_router
 from services.sales_service.api.routes import router as sales_router
 from services.payment_service.routers.payment import router as payment_router
@@ -40,7 +41,7 @@ app = FastAPI(title="Allures Backend")
 
 # Подключение всех роутеров
 app.include_router(product_router, prefix="/products", tags=["Products"])
-app.include_router(image_classifier_router.router, prefix="/product", tags=["AI classifier"])
+# app.include_router(image_classifier_router.router, prefix="/product", tags=["AI classifier"])
 app.include_router(review_router, prefix="/reviews", tags=["Reviews"])
 app.include_router(sales_router, prefix="/sales", tags=["Sales"])
 app.include_router(payment_router, prefix="/payment", tags=["Payment"])
@@ -66,6 +67,12 @@ app.add_middleware(
 
 # db_url = os.getenv("MAINDB_URL")
 # print(" MAINDB_URL:", db_url)
+
+MODEL_PATH = "common/models/image_classifier.h5"
+model = load_model(MODEL_PATH)
+
+def get_image_classifier_model():
+    return model
 
 # Проверка подключения к БД
 @app.on_event("startup")
