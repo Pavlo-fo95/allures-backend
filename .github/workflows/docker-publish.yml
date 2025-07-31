@@ -1,4 +1,4 @@
-name: Build and Push Docker images
+name: Build and Push Changed Services
 
 on:
   push:
@@ -6,100 +6,108 @@ on:
       - main
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      # 🔁 Список всех сервисов, которые билдятся и пушатся
-      - name: Build and push auth_service
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: services/auth_service/Dockerfile
-          push: true
-          tags: denstep123/auth-service:latest
+      - name: Get changed services
+        id: changes
+        run: |
+          echo "changed_dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^services/' | cut -d/ -f2 | uniq | tr '\n' ' ')" >> $GITHUB_OUTPUT
 
       - name: Build and push admin_service
+        if: contains(steps.changes.outputs.changed_dirs, 'admin_service')
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: services/admin_service/Dockerfile
+          context: ./services/admin_service
+          file: ./services/admin_service/Dockerfile
           push: true
           tags: denstep123/admin-service:latest
 
-      - name: Build and push sales_service
+      - name: Build and push auth_service
+        if: contains(steps.changes.outputs.changed_dirs, 'auth_service')
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: services/sales_service/Dockerfile
+          context: ./services/auth_service
+          file: ./services/auth_service/Dockerfile
           push: true
-          tags: denstep123/sales-service:latest
+          tags: denstep123/auth-service:latest
 
-      - name: Build and push review_service
+      - name: Build and push dashboard_service
+        if: contains(steps.changes.outputs.changed_dirs, 'dashboard_service')
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: services/review_service/Dockerfile
+          context: ./services/dashboard_service
+          file: ./services/dashboard_service/Dockerfile
           push: true
-          tags: denstep123/review-service:latest
+          tags: denstep123/dashboard-service:latest
+
+      - name: Build and push discount_service
+        if: contains(steps.changes.outputs.changed_dirs, 'discount_service')
+        uses: docker/build-push-action@v4
+        with:
+          context: ./services/discount_service
+          file: ./services/discount_service/Dockerfile
+          push: true
+          tags: denstep123/discount-service:latest
 
       - name: Build and push payment_service
+        if: contains(steps.changes.outputs.changed_dirs, 'payment_service')
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: services/payment_service/Dockerfile
+          context: ./services/payment_service
+          file: ./services/payment_service/Dockerfile
           push: true
           tags: denstep123/payment-service:latest
 
       - name: Build and push product_service
+        if: contains(steps.changes.outputs.changed_dirs, 'product_service')
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: services/product_service/Dockerfile
+          context: ./services/product_service
+          file: ./services/product_service/Dockerfile
           push: true
           tags: denstep123/product-service:latest
 
       - name: Build and push profile_service
+        if: contains(steps.changes.outputs.changed_dirs, 'profile_service')
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: services/profile_service/Dockerfile
+          context: ./services/profile_service
+          file: ./services/profile_service/Dockerfile
           push: true
           tags: denstep123/profile-service:latest
 
-      - name: Build and push discount_service
+      - name: Build and push review_service
+        if: contains(steps.changes.outputs.changed_dirs, 'review_service')
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: services/discount_service/Dockerfile
+          context: ./services/review_service
+          file: ./services/review_service/Dockerfile
           push: true
-          tags: denstep123/discount-service:latest
+          tags: denstep123/review-service:latest
 
-      - name: Build and push dashboard_service
+      - name: Build and push sales_service
+        if: contains(steps.changes.outputs.changed_dirs, 'sales_service')
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: services/dashboard_service/Dockerfile
+          context: ./services/sales_service
+          file: ./services/sales_service/Dockerfile
           push: true
-          tags: denstep123/dashboard-service:latest
+          tags: denstep123/sales-service:latest
 
       - name: Build and push subscription_service
+        if: contains(steps.changes.outputs.changed_dirs, 'subscription_service')
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: services/subscription_service/Dockerfile
+          context: ./services/subscription_service
+          file: ./services/subscription_service/Dockerfile
           push: true
           tags: denstep123/subscription-service:latest
 
-      - name: 🔁 Вызов вебхука на сервере
+      - name: Trigger server webhook
         run: |
           curl -X POST "${{ secrets.SERVER_WEBHOOK_URL }}" \
-          -H "X-GitHub-Secret: ${{ secrets.SOME_SECRET_HEADER }}"
+          -H "X-GitHub-Secret: ${{ secrets.WEBHOOK_SECRET }}"
