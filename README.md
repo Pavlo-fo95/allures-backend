@@ -1,6 +1,6 @@
 # Allures\&Allol Marketplace Backend
 
-Allures\&Allol — модульная система backend для маркетплейса, построенная на FastAPI с архитектурой микросервисов. Используется PostgreSQL (Supabase), Docker и современный Python-стек.
+Allures\&Allol — модульная система backend для маркетплейса, построенная на FastAPI с архитектурой микросервисов. Используется PostgreSQL (Supabase), Docker и современный Python-стек. 
 
 ---
 
