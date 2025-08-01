@@ -148,8 +148,3 @@ jobs:
           file: ./services/subscription_service/Dockerfile
           push: true
           tags: denstep123/subscription-service:latest
-
-      - name: Trigger server webhook
-        run: |
-          curl -X POST "${{ secrets.SERVER_WEBHOOK_URL }}" \
-            -H "X-GitHub-Secret: ${{ secrets.WEBHOOK_SECRET }}"
