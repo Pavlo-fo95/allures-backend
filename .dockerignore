@@ -12,14 +12,14 @@ __pycache__/
 .env
 
 # ================== Datasets / временные данные ==================
-datasets/
-datasets/bags/
-datasets/bags/Bags/
-datasets/electronics/
-datasets/fashion/
-datasets/fashion/Accessories/
-datasets/fashion/Apparel/
-datasets/personal_care/
+dataset/
+dataset/bags/
+dataset/bags/Bags/
+dataset/electronics/
+dataset/fashion/
+dataset/fashion/Accessories/
+dataset/fashion/Apparel/
+dataset/personal_care/
 
 fashion-dataset/
 fashion-dataset/images/
@@ -44,11 +44,10 @@ logs/
 runs/
 notebooks/
 
-# ================== Jupyter ==================
-*.ipynb
+
 
 # ================== ML-модели ==================
-*.hdf5
+
 *.pt
 *.pth
 *.ckpt

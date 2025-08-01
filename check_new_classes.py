@@ -3,7 +3,7 @@ import os
 import json
 import subprocess
 
-DATA_DIR = "datasets"
+DATA_DIR = "dataset"
 CLASSES_FILE = "models/class_names.txt"
 
 def get_current_classes():

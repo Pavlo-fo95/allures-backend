@@ -68,11 +68,11 @@ app.add_middleware(
 # db_url = os.getenv("MAINDB_URL")
 # print(" MAINDB_URL:", db_url)
 
-MODEL_PATH = "common/models/image_classifier.h5"
-model = load_model(MODEL_PATH)
-
-def get_image_classifier_model():
-    return model
+# MODEL_PATH = "common/models/image_classifier.h5"
+# model = load_model(MODEL_PATH)
+#
+# def get_image_classifier_model():
+#     return model
 
 # Проверка подключения к БД
 @app.on_event("startup")

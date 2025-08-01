@@ -110,11 +110,6 @@ common/models/image_classifier.h5
 
 # ================== Datasets / media ==================
 datasets/
-fashion-dataset/
-fashion-dataset/images/
-fashion-dataset/selected_images/
-fashion-dataset/valid_images/
-fashion-dataset/scripts/
 mock_static/product-images/
 mock_static/product-images_/
 mock_static/uploads/

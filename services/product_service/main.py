@@ -19,6 +19,7 @@ from common.config.settings import settings
 
 from services.product_service.api.routes import router as product_router
 # from services.product_service.api import image_classifier_router
+
 from services.review_service.api.routes import router as review_router
 # from graphql_app.schema import schema as review_schema
 # from strawberry.fastapi import GraphQLRouter
@@ -68,15 +69,14 @@ def startup_event():
         db.close()
 
 # Загрузка модели при старте
-# from services.product_service.api.image_classifier_router import download_model_if_needed
-
+# from common.utils.model_utils import check_model_exists
+#
 # @app.on_event("startup")
-# def download_model_startup():
+# def startup_check_model():
 #     try:
-#         download_model_if_needed()
-#         print("✅ Модель успешно загружена или уже существует")
+#         check_model_exists()
 #     except Exception as e:
-#         print("❌ Ошибка загрузки модели:", str(e))
+#         print("❌ Ошибка при старте сервиса:", str(e))
 
 @app.get("/")
 def root():
