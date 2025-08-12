@@ -3,21 +3,21 @@ import sys
 import os
 import common.utils.env_loader
 
-# Добавление корневого пути (чтобы импортировать общие модули)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))  # доступ к /services и /common
+# Добавление корневого пути (для импорта общих модулей)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
+from dotenv import load_dotenv
 
 from services.dashboard_service.routers import dashboard
-from common.config.settings import settings
 from common.db.session import get_db
-from dotenv import load_dotenv
 
 # Загрузка .env
 load_dotenv()
 
+# Инициализация FastAPI
 app = FastAPI(title="Dashboard Service")
 
 # CORS
@@ -34,29 +34,30 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Роутер
+# 🔗 Подключение REST-роутера
 app.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
 
-# db_url = os.getenv("MAINDB_URL")
-# print("🔗 MAINDB_URL:", db_url)
-
-# Проверка подключения к PostgreSQL
+# ✅ Проверка подключения к БД
 @app.on_event("startup")
 def startup_event():
     db_gen = get_db()
     db = next(db_gen)
     try:
         db.execute(text("SELECT 1"))
-        print(" PostgreSQL подключение успешно (Dashboard Service)")
+        print("✅ PostgreSQL подключение успешно (Dashboard Service)")
     except Exception as e:
-        print(f" Ошибка подключения к PostgreSQL: {e}")
+        print(f"❌ Ошибка подключения к PostgreSQL: {e}")
     finally:
         db.close()
 
-# Корень
+# Корневой эндпоинт
 @app.get("/")
 def root():
     return {"message": "Dashboard Service is running"}
 
+# Статичный summary endpoint — для устранения ошибки 422
+@app.get("/dashboard/summary")
+def get_summary():
+    return {"summary": "Dashboard summary is working"}
 
 # uvicorn services.dashboard_service.main:app --reload --port 8007

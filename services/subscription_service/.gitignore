@@ -139,3 +139,5 @@ Dockerfile.*
 *.png
 *.jpg
 *.jpeg
+
+*.swp

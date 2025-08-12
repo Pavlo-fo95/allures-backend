@@ -1,34 +1,32 @@
 #main.py product_service
 import sys
 import os
-# import common.utils.env_loader
 
-# Добавление корневого пути (чтобы импортировать общие модули)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))  # доступ к /services и /common
+# Добавляем корень проекта для импорта общих модулей
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 from fastapi import FastAPI
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
-from common.models.products import Product
-from common.models.categories import Category
-
 
 from common.db.session import get_db
 from common.config.settings import settings
 
 from services.product_service.api.routes import router as product_router
-# from services.product_service.api import image_classifier_router
-
 from services.review_service.api.routes import router as review_router
-# from graphql_app.schema import schema as review_schema
-# from strawberry.fastapi import GraphQLRouter
 
-# Загрузка .env переменных
+# GraphQL
+from strawberry.fastapi import GraphQLRouter
+from schema_graphql import schema
+
+# Загрузка переменных среды
 load_dotenv()
 
+# Инициализация FastAPI
 app = FastAPI(title="Product Service")
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -42,20 +40,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Проверка: вывод URL подключения
+# Вывод строки подключения
 print("▶ MAINDB_URL из settings:", settings.MAINDB_URL)
 
-# Подключаем REST маршруты
+# Подключение REST маршрутов
 app.include_router(product_router, prefix="/products", tags=["Products"])
-
 app.include_router(review_router, prefix="/reviews", tags=["Reviews"])
 
-# app.include_router(image_classifier_router.router, prefix="/product", tags=["AI classifier"])
+# Подключение GraphQL
+graphql_app = GraphQLRouter(schema)
+app.include_router(graphql_app, prefix="/graphql")
 
-# db_url = os.getenv("MAINDB_URL")
-# print(" MAINDB_URL:", db_url)
-
-# Проверка подключения к БД
+# Проверка подключения к БД при старте
 @app.on_event("startup")
 def startup_event():
     db_gen = get_db()
@@ -68,16 +64,7 @@ def startup_event():
     finally:
         db.close()
 
-# Загрузка модели при старте
-# from common.utils.model_utils import check_model_exists
-#
-# @app.on_event("startup")
-# def startup_check_model():
-#     try:
-#         check_model_exists()
-#     except Exception as e:
-#         print("❌ Ошибка при старте сервиса:", str(e))
-
+# Тестовые эндпоинты
 @app.get("/")
 def root():
     return {"message": "Product Service is running"}
@@ -93,8 +80,9 @@ def check_db():
         return {"error": str(e)}
     finally:
         db.close()
-# GraphQL (в будущем можно раскомментировать)
-# graphql_app = GraphQLRouter(review_schema)
-# app.include_router(graphql_app, prefix="/graphql_app")
+
+@app.get("/review/{product_id}")
+def get_reviews(product_id: int):
+    return [{"id": 1, "product_id": product_id, "text": "Great!", "sentiment": "positive"}]
 
 # uvicorn services.product_service.main:app --reload --port 8000

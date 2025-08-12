@@ -110,9 +110,12 @@ common/models/image_classifier.h5
 
 # ================== Datasets / media ==================
 datasets/
-mock_static/product-images/
-mock_static/product-images_/
 mock_static/uploads/
 
 # ================== Mac OS ==================
 .DS_Store
+
+scripts/legacy/
+
+allures-backend/
+

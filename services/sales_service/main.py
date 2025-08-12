@@ -27,7 +27,7 @@ app.include_router(sales_router, tags=["sales"], prefix="/sales")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",              # локальный React
+        "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://api.alluresallol.com",
         "https://alluresallol.com",

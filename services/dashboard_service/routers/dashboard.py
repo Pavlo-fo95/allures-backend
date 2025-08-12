@@ -1,7 +1,7 @@
 # services/dashboard_service/routers/dashboard.py
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Request, Depends, APIRouter, HTTPException, Query, Path
-from services.dashboard_service.schemas.dashboard import DashboardOut, DashboardLogOut, Sale, Review, Discount, Recommendation
+from fastapi import APIRouter, Request, Depends, HTTPException, Query, Path
+from services.dashboard_service.schemas.dashboard import DashboardOut, DashboardLogOut, Sale, Review, Discount, Recommendation, UserProfileUpdate
 from services.dashboard_service.utils.fetch_data import get_sales_count, get_reviews_count
 from common.config.settings import settings
 from common.db.session import get_db
@@ -9,13 +9,10 @@ from datetime import datetime
 from common.models.dashboard_log import DashboardLog
 from common.models.subscriptions import Subscription, UserSubscription
 from common.models.payment import Payment
-from services.dashboard_service.schemas.dashboard import UserProfileUpdate
-
 from typing import List, Optional
 import httpx
 
 router = APIRouter()
-
 AUTH_SERVICE_URL = settings.AUTH_SERVICE_URL
 SALES_SERVICE_URL = settings.SALES_SERVICE_URL
 REVIEW_SERVICE_URL = settings.REVIEW_SERVICE_URL
@@ -35,7 +32,12 @@ def save_dashboard_log(db: Session, user_id: int, user_agent: str, notes: str = 
         db.rollback()
         print(f" Error saving dashboard log: {str(e)}")
 
+# Сначала тестовый эндпоинт
+@router.get("/summary")
+def get_summary():
+    return {"summary": "Dashboard summary is working"}
 
+# Получение логов доступа
 @router.get("/logs/", response_model=List[DashboardLogOut])
 def get_logs(
     db: Session = Depends(get_db),
@@ -46,7 +48,6 @@ def get_logs(
 ):
     query = db.query(DashboardLog)
 
-    # Фильтры
     if user_id is not None:
         query = query.filter(DashboardLog.user_id == user_id)
     if from_date is not None:
@@ -54,14 +55,8 @@ def get_logs(
     if to_date is not None:
         query = query.filter(DashboardLog.fetched_at <= to_date)
 
-    # Сортировка
-    if sort_desc:
-        query = query.order_by(DashboardLog.fetched_at.desc())
-    else:
-        query = query.order_by(DashboardLog.fetched_at.asc())
-
+    query = query.order_by(DashboardLog.fetched_at.desc() if sort_desc else DashboardLog.fetched_at.asc())
     return query.all()
-
 
 # Получение всех пользователей
 @router.get("/all/users", response_model=List[dict])
@@ -119,6 +114,7 @@ async def get_all_recommendations():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Помилка при отриманні рекомендацій: {str(e)}")
 
+# Профиль по пользователю
 @router.get("/profile/{user_id}", summary="Отримати профіль користувача", response_model=DashboardOut)
 async def get_user_profile(user_id: int):
     try:
@@ -148,12 +144,7 @@ async def get_user_profile(user_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Невідома помилка: {str(e)}")
 
-# эндпоинт для теста
-@router.get("/stats")
-def get_dashboard_stats():
-    return {"status": "ok"}
-
-# Основной эндпоинт дашборда (логирует вход и возвращает агрегированные данные)
+# Основной агрегированный эндпоинт с логированием
 @router.get("/{user_id}", response_model=DashboardOut)
 async def get_dashboard(user_id: int, request: Request, db: Session = Depends(get_db)):
     user_agent = request.headers.get("user-agent", "unknown")
@@ -185,5 +176,4 @@ async def get_dashboard(user_id: int, request: Request, db: Session = Depends(ge
         raise HTTPException(status_code=404, detail="Користувача не знайдено")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Невідома помилка: {str(e)}")
-
 

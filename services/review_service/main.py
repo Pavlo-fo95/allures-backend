@@ -1,30 +1,27 @@
 # services/review_service/main.py
 import sys
 import os
-# import common.utils.env_loader
 
 # Добавление корневого пути (для доступа к /services и /common)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from sqlalchemy import text
-from common.models.products import Product
-from common.models.categories import Category
+from dotenv import load_dotenv
 
-from common.models.payment import Payment
-from common.models.subscriptions import Subscription, UserSubscription
 from common.db.base import Base
 from common.db.session import engine, get_db
 from services.review_service.api.routes import router
-from services.review_service.models.recommendation import Recommendation
-from services.review_service.models.review import Review
-from dotenv import load_dotenv
+
+# Strawberry GraphQL
+from strawberry.fastapi import GraphQLRouter
+from schema_graphql.schema import schema
 
 # Загрузка .env
 load_dotenv()
 
+# Инициализация FastAPI
 app = FastAPI(title="Review Service")
 
 # CORS
@@ -41,13 +38,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Здесь была ошибка — теперь исправлено
+# REST роутеры
 app.include_router(router, prefix="/reviews", tags=["Reviews"])
 
-# db_url = os.getenv("MAINDB_URL")
-# print(" MAINDB_URL:", db_url)
+# GraphQL
+graphql_app = GraphQLRouter(schema)
+app.include_router(graphql_app, prefix="/graphql")
 
-# Создание таблиц при старте
+# Создание таблиц и проверка подключения
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
@@ -55,16 +53,15 @@ def on_startup():
     db = next(db_gen)
     try:
         db.execute(text("SELECT 1"))
-        print("PostgreSQL подключение успешно (Review Service)")
+        print("✅ PostgreSQL подключение успешно (Review Service)")
     except Exception as e:
-        print(f"Ошибка подключения к PostgreSQL: {e}")
+        print(f"❌ Ошибка подключения к PostgreSQL: {e}")
     finally:
         db.close()
 
-# Корень
+# Корневой эндпоинт
 @app.get("/")
 def root():
     return {"message": "Review Service is running"}
-
 
 # uvicorn services.review_service.main:app --reload --port 8002

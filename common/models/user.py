@@ -27,7 +27,6 @@ class User(Base):
     reviews = relationship("Review", back_populates="user", cascade="all, delete-orphan")
     subscriptions = relationship("UserSubscription", back_populates="user", cascade="all, delete")
 
-
 from common.models.sales import Sales
 from common.models.uploads import Upload
 from services.review_service.models.review import Review

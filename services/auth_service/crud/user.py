@@ -1,4 +1,4 @@
-# 📁 services/auth_service/crud/user.py
+#  services/auth_service/crud/user.py
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
@@ -9,7 +9,7 @@ from common.models.subscriptions import UserSubscription
 from services.auth_service.utils.security import hash_password, verify_password
 from services.auth_service.schemas.user import UserCreate
 
-# ✅ Регистрация пользователя
+#  Регистрация пользователя
 def create_user(db: Session, user: UserCreate):
     db_user = User(
         login=user.login,
@@ -28,7 +28,7 @@ def create_user(db: Session, user: UserCreate):
         raise HTTPException(status_code=500, detail=f"Помилка під час реєстрації: {str(e)}")
 
 
-# ✅ Аутентификация
+#  Аутентификация
 def authenticate_user(db: Session, login: str, password: str):
     user = db.query(User).filter(User.login == login).first()
 
@@ -41,18 +41,18 @@ def authenticate_user(db: Session, login: str, password: str):
 
     return user
 
-# ✅ Всі користувачі
+#  Всі користувачі
 def get_all_users(db: Session):
     return db.query(User).all()
 
-# ✅ Запит на скидання пароля
+#  Запит на скидання пароля
 def forgot_password(db: Session, email: str):
     user = db.query(User).filter(User.login == email).first()
     if not user:
         raise HTTPException(status_code=404, detail="Користувача не знайдено")
     return {"message": f"Лист для скидання пароля надіслано на {email}"}
 
-# ✅ Скидання пароля
+#  Скидання пароля
 def reset_password(db: Session, email: str, new_password: str):
     user = db.query(User).filter(User.login == email).first()
     if not user:
@@ -62,7 +62,7 @@ def reset_password(db: Session, email: str, new_password: str):
     db.commit()
     return {"message": "Пароль успішно змінено"}
 
-# ✅ Пошук користувача з підпискою
+#  Пошук користувача з підпискою
 def get_user_by_login(db: Session, login: str):
     user = db.query(User).options(
         joinedload(User.uploads),
@@ -74,7 +74,7 @@ def get_user_by_login(db: Session, login: str):
         user.subscription_type = active_sub.subscription.name if active_sub else "none"
     return user
 
-# ✅ Зміна пароля
+#  Зміна пароля
 def change_password(db: Session, login: str, old_password: str, new_password: str):
     user = get_user_by_login(db, login)
     if not user or not verify_password(old_password, user.password):
@@ -83,7 +83,7 @@ def change_password(db: Session, login: str, old_password: str, new_password: st
     db.commit()
     return user
 
-# ✅ Видалення користувача
+#  Видалення користувача
 def delete_user_by_id(db: Session, user_id: int):
     try:
         user = db.query(User).filter(User.id == user_id).first()

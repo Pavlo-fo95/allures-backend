@@ -8,7 +8,7 @@ from services.review_service.api import controller
 from services.review_service.logic.recommendation import (
     Product, recommend_products, save_recommendations_to_db
 )
-from services.review_service.models.review import Review
+
 from services.review_service.models.recommendation import Recommendation
 from services.review_service.api.schemas import (
     ReviewCreate, ReviewOut,
@@ -21,8 +21,14 @@ from services.review_service.api.crud import (
     delete_recommendation, get_recommendations_filtered
 )
 from common.models.products import Product as ProductModel
+from services.review_service.models.review import Review as ReviewModel
 
 router = APIRouter()
+
+@router.get("/product/{product_id}", response_model=List[ReviewOut])
+def get_reviews_by_product(product_id: int, db: Session = Depends(get_db)):
+    reviews = db.query(ReviewModel).filter(ReviewModel.product_id == product_id).all()
+    return reviews
 
 # === REVIEWS ===
 
@@ -31,7 +37,7 @@ def add_review(review: ReviewCreate, db: Session = Depends(get_db)):
     return controller.create_review(db, review)
 
 
-@router.get("/reviews/{product_id}", response_model=List[ReviewOut])
+@router.get("/reviews/product/{product_id}", response_model=List[ReviewOut])
 def get_reviews(product_id: int, db: Session = Depends(get_db)):
     return controller.get_reviews_by_product(db, product_id)
 

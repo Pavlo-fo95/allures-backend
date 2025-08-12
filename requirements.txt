@@ -164,7 +164,7 @@ soupsieve==2.7
 sqlalchemy==2.0.30
 stack-data==0.6.3
 starlette==0.46.0
-#strawberry-graphql==0.275.0
+strawberry-graphql[fastapi]>=0.140
 #tensorboard-data-server==0.7.2
 #tensorboard==2.19.0
 #tensorflow-io-gcs-filesystem==0.31.0

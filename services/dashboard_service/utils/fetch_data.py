@@ -1,5 +1,8 @@
 import httpx
 from common.config.settings import settings
+from sqlalchemy.orm import Session
+from common.models.dashboard_log import DashboardLog
+from datetime import datetime
 
 SALES_SERVICE_URL = settings.SALES_SERVICE_URL
 REVIEW_SERVICE_URL = settings.REVIEW_SERVICE_URL
@@ -32,3 +35,28 @@ async def get_reviews_count(user_id: int) -> int:
     except Exception as e:
         print(f" Ошибка при получении отзывов пользователя {user_id}: {e}")
     return 0
+
+def save_dashboard_log(db: Session, user_id: int, user_agent: str):
+    """
+    Сохраняет лог входа пользователя на дашборд.
+    """
+    log = DashboardLog(
+        user_id=user_id,
+        user_agent=user_agent,
+        accessed_at=datetime.utcnow()
+    )
+    db.add(log)
+    db.commit()
+
+
+def save_dashboard_log(db: Session, user_id: int, user_agent: str):
+    """
+    Сохраняет лог входа пользователя на дашборд.
+    """
+    log = DashboardLog(
+        user_id=user_id,
+        user_agent=user_agent,
+        accessed_at=datetime.utcnow()
+    )
+    db.add(log)
+    db.commit()

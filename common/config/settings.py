@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     DISCOUNT_SERVICE_URL: str = Field(..., alias="DISCOUNT_SERVICE_URL")
 
     # TODO: включить DASHBOARD_SERVICE_URL после запуска dashboard_service
-    # DASHBOARD_SERVICE_URL: str = Field(..., alias="DASHBOARD_SERVICE_URL")
+    DASHBOARD_SERVICE_URL: str = Field(..., alias="DASHBOARD_SERVICE_URL")
     ADMIN_SERVICE_URL: str = Field(..., alias="ADMIN_SERVICE_URL")
     SUBSCRIPTION_SERVICE_URL: str = Field(..., alias="SUBSCRIPTION_SERVICE_URL")
 
